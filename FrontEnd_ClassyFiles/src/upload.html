@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Subir Proyecto - ClassyFiles</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+      body {
+        font-family: 'Inter', sans-serif;
+      }
+    </style>
+  </head>
+  <body class="bg-[#FFF6F1]">
+    <header class="bg-[#14263C] text-white">
+      <div class="container mx-auto px-4 py-4">
+        <div class="flex items-center justify-between">
+          <a href="/" class="flex items-center">
+            <span class="text-2xl font-bold text-[#D18E41]">Classy</span>
+            <span class="text-2xl font-bold text-white">Files</span>
+          </a>
+          <nav class="hidden md:flex space-x-8">
+            <a href="#" class="text-white hover:text-[#D18E41] transition-colors">
+              Inicio
+            </a>
+            <a href="#" class="text-white hover:text-[#D18E41] transition-colors">
+              Mis Proyectos
+            </a>
+            <a href="#" class="text-white hover:text-[#D18E41] transition-colors">
+              Ayuda
+            </a>
+          </nav>
+        </div>
+      </div>
+    </header>
+    <main class="py-12 px-4 sm:px-6 lg:px-8">
+      <div class="max-w-3xl mx-auto">
+        <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+          <div class="p-8">
+            <h1 class="text-3xl font-bold text-[#14263C] text-center mb-8">
+              Subir Nuevo Proyecto
+            </h1>
+            <form class="space-y-8">
+              <!-- Sección de Metadatos -->
+              <div class="space-y-6">
+                <h2 class="text-xl font-semibold text-[#14263C] border-b pb-2">
+                  Información General
+                </h2>
+                <div>
+                  <label for="title" class="block text-sm font-medium text-[#14263C]">
+                    Título del Proyecto *
+                  </label>
+                  <input
+                    type="text"
+                    id="title"
+                    required
+                    class="mt-1 block w-full border border-[#BEBEBE] rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-[#D18E41] focus:border-[#D18E41]"
+                    placeholder="Ingrese el título del proyecto"
+                  />
+                </div>
+                <div>
+                  <label for="area" class="block text-sm font-medium text-[#14263C]">
+                    Área Científica *
+                  </label>
+                  <select
+                    id="area"
+                    required
+                    class="mt-1 block w-full border border-[#BEBEBE] rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-[#D18E41] focus:border-[#D18E41]"
+                  >
+                    <option value="">Seleccione un área</option>
+                    <option value="medicina">Medicina</option>
+                    <option value="biologia">Biología</option>
+                    <option value="quimica">Química</option>
+                    <option value="fisica">Física</option>
+                    <option value="ingenieria">Ingeniería</option>
+                    <option value="sociales">Ciencias Sociales</option>
+                    <option value="humanidades">Humanidades</option>
+                    <option value="otros">Otros</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="summary" class="block text-sm font-medium text-[#14263C]">
+                    Resumen *
+                  </label>
+                  <textarea
+                    id="summary"
+                    rows="4"
+                    required
+                    class="mt-1 block w-full border border-[#BEBEBE] rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-[#D18E41] focus:border-[#D18E41]"
+                    placeholder="Describa brevemente su proyecto"
+                  ></textarea>
+                </div>
+              </div>
+              <!-- Sección de Documentos -->
+              <div class="space-y-6">
+                <h2 class="text-xl font-semibold text-[#14263C] border-b pb-2">
+                  Documentos
+                </h2>
+                <div class="border-2 border-dashed border-[#BEBEBE] rounded-lg p-8 text-center hover:border-[#D18E41] transition-colors">
+                  <div class="space-y-2">
+                    <svg
+                      class="mx-auto h-12 w-12 text-[#BEBEBE]"
+                      stroke="currentColor"
+                      fill="none"
+                      viewBox="0 0 48 48"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M24 32V16m0 0l-8 8m8-8l8 8"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                    </svg>
+                    <div class="text-sm text-[#14263C]">
+                      <label
+                        for="file-upload"
+                        class="relative cursor-pointer rounded-md font-medium text-[#D18E41] hover:text-[#14263C] focus-within:outline-none"
+                      >
+                        <span>Suba un archivo</span>
+                        <input
+                          id="file-upload"
+                          name="file-upload"
+                          type="file"
+                          class="sr-only"
+                          accept=".pdf"
+                        />
+                      </label>
+                      <p class="pl-1">o arrastre y suelte aquí</p>
+                    </div>
+                    <p class="text-xs text-[#BEBEBE]">PDF hasta 50MB</p>
+                  </div>
+                </div>
+              </div>
+              <!-- Sección de Financiamiento -->
+              <div class="space-y-6">
+                <h2 class="text-xl font-semibold text-[#14263C] border-b pb-2">
+                  Financiamiento
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label
+                      for="budget"
+                      class="block text-sm font-medium text-[#14263C]"
+                    >
+                      Presupuesto Solicitado (USD) *
+                    </label>
+                    <input
+                      type="number"
+                      id="budget"
+                      required
+                      min="0"
+                      class="mt-1 block w-full border border-[#BEBEBE] rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-[#D18E41] focus:border-[#D18E41]"
+                      placeholder="0.00"
+                    />
+                  </div>
+                  <div>
+                    <label
+                      for="timeline"
+                      class="block text-sm font-medium text-[#14263C]"
+                    >
+                      Plazo de Ejecución (meses) *
+                    </label>
+                    <input
+                      type="number"
+                      id="timeline"
+                      required
+                      min="1"
+                      class="mt-1 block w-full border border-[#BEBEBE] rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-[#D18E41] focus:border-[#D18E41]"
+                      placeholder="12"
+                    />
+                  </div>
+                </div>
+              </div>
+              <!-- Botones de Acción -->
+              <div class="flex justify-end space-x-4 pt-6 border-t">
+                <button
+                  type="button"
+                  class="px-4 py-2 border border-[#14263C] text-[#14263C] rounded-md hover:bg-[#14263C] hover:text-white transition-colors"
+                >
+                  Guardar Borrador
+                </button>
+                <button
+                  type="submit"
+                  class="px-6 py-2 bg-[#D18E41] text-white rounded-md hover:bg-opacity-90 transition-colors"
+                >
+                  Enviar para Revisión
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </main>
+    <footer class="bg-[#0A0A0C] text-white mt-12 py-6">
+      <div class="container mx-auto px-4 text-center">
+        <p class="text-sm text-[#BEBEBE]">
+          © 2023 ClassyFiles. Todos los derechos reservados.
+        </p>
+      </div>
+    </footer>
+  </body>
+</html>
