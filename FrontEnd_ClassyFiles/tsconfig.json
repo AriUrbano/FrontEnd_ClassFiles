@@ -3,11 +3,13 @@
     "jsx": "react-jsx", // o "react" si usas una versión anterior
     "esModuleInterop": true,
     "strict": true,
-    "module": "es2020", // o "esnext", "node16", etc.
     "moduleResolution": "node",
     "target": "es2020",
-    "types": ["vite/client"], // Añade esto para reconocer `import.meta.env`
-       "noImplicitAny": false
+    "types": ["node"], 
+     // Añade esto para reconocer `import.meta.env`
+       "noImplicitAny": false,
+       "module": "commonjs",
+    "skipLibCheck": true
 
   }
 }

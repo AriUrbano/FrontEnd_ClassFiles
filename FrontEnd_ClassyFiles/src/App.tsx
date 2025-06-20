@@ -17,6 +17,8 @@ import { CompanLoginForm } from './components/auth/compania/CompaniLoginForm';
 import { RegisterFormCompany } from './components/auth/compania/RegisterFormCompany';
 import TestConnection from './components/TestConnection';
 import { Dashboard } from './components/PagePaper/Dashboard';
+import { SecurityProvider } from './components/SecurityProvider';
+
 
 
 
@@ -41,6 +43,8 @@ export function App() {
     return () => window.removeEventListener('storage', checkAuth);
   }, []);
 
+
+
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('userType');
@@ -50,6 +54,7 @@ export function App() {
   };
 
   return (
+     <SecurityProvider>
     <BrowserRouter>
       <div className="flex flex-col min-h-screen bg-[#FFF6F1]">
         <Header 
@@ -117,5 +122,6 @@ export function App() {
         <Footer />
       </div>
     </BrowserRouter>
+    </SecurityProvider>
   );
 }

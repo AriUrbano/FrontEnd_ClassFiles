@@ -1,64 +1,88 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LockIcon, MailIcon, UserIcon, PhoneIcon, CheckCircle, XCircle } from 'lucide-react';
+import { UserIcon, MailIcon, PhoneIcon, LockIcon, CheckCircle, XCircle } from 'lucide-react';
+import { 
+  validatePassword, 
+  sanitizeInput, 
+  validateUserName,
+  validatePhone,
+  calculatePasswordStrength
+} from '../../../utils/validation';
 
-export function RegisterFormUser({ setIsAuth, setUserType }: { setIsAuth: (value: boolean) => void, setUserType: (value: 'user' | 'company' | null) => void }) {
+interface RegisterFormProps {
+  setIsAuth: (value: boolean) => void;
+  setUserType: (type: 'user' | 'company' | null) => void;
+}
+
+export function RegisterFormUser({ setIsAuth, setUserType }: RegisterFormProps) {
   const [formData, setFormData] = useState({
-    nombre_completo: '',
-    email: '',
-    telefono: '',
-    password: '',
-    confirmPassword: ''
-  });
+  nombre_completo: '',
+  email: '',
+  telefono: '', // Asegúrate que es string vacío
+  password: '',
+  confirmPassword: ''
+});
 
   const [validation, setValidation] = useState({
     nombre_completo: { valid: false, message: '' },
     email: { valid: false, message: '' },
+    telefono: { valid: true, message: '' },
     password: { valid: false, message: '' },
     confirmPassword: { valid: false, message: '' }
   });
-const [successMessage, setSuccessMessage] = useState('');
 
+  const [passwordStrength, setPasswordStrength] = useState(0);
   const [serverStatus, setServerStatus] = useState<'checking'|'healthy'|'unhealthy'>('checking');
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
-  // Validaciones en tiempo real (mantenemos igual)
+  // Validaciones en tiempo real
   useEffect(() => {
-    const validateField = (name: string, validator: () => { valid: boolean; message: string }) => {
-      if (formData[name as keyof typeof formData]) {
-        const result = validator();
-        setValidation(prev => ({ ...prev, [name]: result }));
+    setPasswordStrength(calculatePasswordStrength(formData.password));
+
+    const validations = {
+      nombre_completo: {
+        test: () => validateUserName(formData.nombre_completo),
+        message: 'Nombre completo inválido (3-50 caracteres, solo letras y espacios)'
+      },
+      email: {
+        test: () => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email),
+        message: 'Email inválido'
+      },
+      telefono: {
+        test: () => formData.telefono === '' || validatePhone(formData.telefono),
+        message: 'Teléfono inválido (ej: +1234567890)'
+      },
+      password: {
+        test: () => {
+          const result = validatePassword(formData.password);
+          return result.valid;
+        },
+        message: validatePassword(formData.password).message
+      },
+      confirmPassword: {
+        test: () => formData.password === formData.confirmPassword && 
+                   formData.password !== '',
+        message: 'Las contraseñas no coinciden'
       }
     };
 
-    validateField('nombre_completo', () => {
-      const valid = formData.nombre_completo.length >= 3;
-      return { valid, message: valid ? '' : 'Mínimo 3 caracteres' };
-    });
-
-    validateField('email', () => {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      const valid = emailRegex.test(formData.email);
-      return { valid, message: valid ? '' : 'Email inválido' };
-    });
-
-    validateField('password', () => {
-      const valid = formData.password.length >= 8 && 
-                   /[A-Z]/.test(formData.password) && 
-                   /[0-9]/.test(formData.password);
-      return { valid, message: valid ? '' : 'Mínimo 8 caracteres, 1 mayúscula y 1 número' };
-    });
-
-    validateField('confirmPassword', () => {
-      const valid = formData.password === formData.confirmPassword && 
-                   formData.password !== '';
-      return { valid, message: valid ? '' : 'Las contraseñas no coinciden' };
+    Object.entries(validations).forEach(([field, { test, message }]) => {
+      if (formData[field as keyof typeof formData] || field === 'confirmPassword') {
+        setValidation(prev => ({
+          ...prev,
+          [field]: {
+            valid: test(),
+            message: test() ? '' : message
+          }
+        }));
+      }
     });
   }, [formData]);
 
-  // Verificación del servidor con URL corregida
+  // Verificación del servidor
   useEffect(() => {
     const checkServer = async () => {
       try {
@@ -72,58 +96,72 @@ const [successMessage, setSuccessMessage] = useState('');
     checkServer();
   }, []);
 
-  const API_BASE_URL = 'http://localhost:3001/api/auth';
+ const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const { name, value } = e.target;
+  
+  // Sanitización especial para teléfono
+  const sanitizedValue = name === 'telefono' 
+    ? value.replace(/[^\d+()\s-]/g, '') // Permite números, +, (), - y espacios
+    : sanitizeInput(value);
 
-const handleSubmit = async (e: React.FormEvent) => {
+  setFormData(prev => ({ ...prev, [name]: sanitizedValue }));
+  setError('');
+};
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
-    setError('');
 
+    console.log('Datos del formulario:', {
+    ...formData,
+    telefono: formData.telefono || null // Convertir vacío a null
+  });
+    
     try {
-      const response = await fetch('http://localhost:3001/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          nombre_completo: formData.nombre_completo,
-          email: formData.email,
-          telefono: formData.telefono,
-          password: formData.password,
-          confirmPassword: formData.confirmPassword
-        })
+      // Validación final antes de enviar
+      Object.entries(formData).forEach(([key, value]) => {
+        if (key !== 'telefono' && !value) {
+          throw new Error('Todos los campos obligatorios deben completarse');
+        }
       });
 
-      // Manejo especial para respuestas no JSON
-      const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
-        const text = await response.text();
-        throw new Error(text.startsWith('<!') ? 
-          'Error en el servidor (respuesta no JSON)' : 
-          text);
+      setIsSubmitting(true);
+      setError('');
+
+     const response = await fetch('http://localhost:3001/api/auth/register', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    nombre_completo: formData.nombre_completo,
+    email: formData.email,
+    telefono: formData.telefono || null,
+    password: formData.password,
+    confirmPassword: formData.confirmPassword,
+    id_compania: 1 // O el valor adecuado para tu caso
+  })
+});
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Error en el registro');
       }
 
-      const data = await response.json();
-    if (!response.ok) {
-        throw new Error(data.error || 'Error en el registro');
-      }
-
-      // Registro exitoso - muestra mensaje y redirige al login
-      setSuccessMessage('¡Registro exitoso! Redirigiendo al login...');
-setTimeout(() => {
-  navigate('/user-auth/login');
-}, 2000);
-      
+      setSuccessMessage('¡Registro exitoso! Redirigiendo...');
+      setTimeout(() => {
+        setIsAuth(true);
+        setUserType('user');
+        navigate('/dashboard');
+      }, 2000);
     } catch (err) {
       setError(err instanceof Error ? 
-        err.message : 
-        'Error desconocido durante el registro');
+        err.message.replace(/<\/?[^>]+(>|$)/g, "") : 
+        'Error desconocido');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const isFormValid = Object.values(validation).every(f => f.valid);
+  const isFormValid = Object.entries(validation)
+    .filter(([key]) => key !== 'telefono')
+    .every(([_, { valid }]) => valid);
 
   return (
     <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
@@ -150,14 +188,23 @@ setTimeout(() => {
 
       {error && (
         <div className="mb-4 p-2 bg-red-100 text-red-800 rounded text-sm">
-          {error}
+          {error.includes('no permitidos') ? (
+            <>
+              <strong>¡Error de seguridad!</strong>
+              <p className="mt-1">Hemos detectado caracteres no permitidos.</p>
+            </>
+          ) : (
+            error
+          )}
         </div>
       )}
+
       {successMessage && (
-  <div className="mb-4 p-2 bg-green-100 text-green-800 rounded text-sm">
-    {successMessage}
-  </div>
-)}
+        <div className="mb-4 p-2 bg-green-100 text-green-800 rounded text-sm">
+          {successMessage}
+        </div>
+      )}
+
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Campo Nombre Completo */}
         <div>
@@ -167,12 +214,16 @@ setTimeout(() => {
               type="text"
               name="nombre_completo"
               value={formData.nombre_completo}
-              onChange={(e) => setFormData({...formData, nombre_completo: e.target.value})}
+              onChange={handleChange}
               className={`w-full p-2 border rounded ${
                 validation.nombre_completo.valid ? 'border-green-500' :
                 formData.nombre_completo ? 'border-red-500' : 'border-gray-300'
               }`}
               required
+              minLength={3}
+              maxLength={50}
+              pattern="^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$"
+              title="Solo letras y espacios (3-50 caracteres)"
             />
             <UserIcon className="absolute right-3 top-3 text-gray-400" />
           </div>
@@ -189,12 +240,14 @@ setTimeout(() => {
               type="email"
               name="email"
               value={formData.email}
-              onChange={(e) => setFormData({...formData, email: e.target.value})}
+              onChange={handleChange}
               className={`w-full p-2 border rounded ${
                 validation.email.valid ? 'border-green-500' :
                 formData.email ? 'border-red-500' : 'border-gray-300'
               }`}
               required
+              inputMode="email"
+              autoComplete="email"
             />
             <MailIcon className="absolute right-3 top-3 text-gray-400" />
           </div>
@@ -208,14 +261,21 @@ setTimeout(() => {
           <label className="block text-sm font-medium mb-1">Teléfono</label>
           <div className="relative">
             <input
-              type="tel"
-              name="telefono"
-              value={formData.telefono}
-              onChange={(e) => setFormData({...formData, telefono: e.target.value})}
-              className="w-full p-2 border border-gray-300 rounded"
-            />
+  type="tel"
+  name="telefono"
+  value={formData.telefono}
+  onChange={handleChange}
+  className={`w-full p-2 border rounded ${
+    validation.telefono.valid ? 'border-gray-300' : 'border-red-500'
+  }`}
+  pattern="^[\+]?[(]?[0-9]{1,4}[)]?[-\s\.\/0-9]{7,15}$"
+  title="Ejemplos válidos: +51987654321, (01)9876543, 987-654-321"
+/>
             <PhoneIcon className="absolute right-3 top-3 text-gray-400" />
           </div>
+          {!validation.telefono.valid && formData.telefono && (
+            <p className="text-red-500 text-xs mt-1">{validation.telefono.message}</p>
+          )}
         </div>
 
         {/* Campo Contraseña */}
@@ -226,18 +286,58 @@ setTimeout(() => {
               type="password"
               name="password"
               value={formData.password}
-              onChange={(e) => setFormData({...formData, password: e.target.value})}
+              onChange={handleChange}
               className={`w-full p-2 border rounded ${
                 validation.password.valid ? 'border-green-500' :
                 formData.password ? 'border-red-500' : 'border-gray-300'
               }`}
               required
+              minLength={12}
+              maxLength={64}
+              autoComplete="new-password"
+              pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{12,}$"
             />
             <LockIcon className="absolute right-3 top-3 text-gray-400" />
           </div>
           {!validation.password.valid && formData.password && (
             <p className="text-red-500 text-xs mt-1">{validation.password.message}</p>
           )}
+          <div className="mt-2">
+            <div className="w-full bg-gray-200 rounded-full h-2.5">
+              <div 
+                className="h-2.5 rounded-full" 
+                style={{
+                  width: `${passwordStrength}%`,
+                  backgroundColor: passwordStrength < 40 ? '#ef4444' : 
+                                  passwordStrength < 70 ? '#f59e0b' : '#10b981'
+                }}
+              ></div>
+            </div>
+            <div className="text-xs text-gray-500 mt-1">
+              Seguridad: {passwordStrength < 40 ? 'Débil' : 
+                         passwordStrength < 70 ? 'Moderada' : 'Fuerte'}
+            </div>
+          </div>
+          <div className="text-xs text-gray-500 mt-2">
+            <p className="font-medium">La contraseña debe contener:</p>
+            <ul className="list-disc pl-5 space-y-1">
+              <li className={formData.password.length >= 12 ? 'text-green-500' : ''}>
+                Mínimo 12 caracteres
+              </li>
+              <li className={/[A-Z]/.test(formData.password) ? 'text-green-500' : ''}>
+                Al menos 1 letra mayúscula
+              </li>
+              <li className={/[a-z]/.test(formData.password) ? 'text-green-500' : ''}>
+                Al menos 1 letra minúscula
+              </li>
+              <li className={/[0-9]/.test(formData.password) ? 'text-green-500' : ''}>
+                Al menos 1 número
+              </li>
+              <li className={/[^A-Za-z0-9]/.test(formData.password) ? 'text-green-500' : ''}>
+                Al menos 1 carácter especial
+              </li>
+            </ul>
+          </div>
         </div>
 
         {/* Campo Confirmar Contraseña */}
@@ -248,12 +348,13 @@ setTimeout(() => {
               type="password"
               name="confirmPassword"
               value={formData.confirmPassword}
-              onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
+              onChange={handleChange}
               className={`w-full p-2 border rounded ${
                 validation.confirmPassword.valid ? 'border-green-500' :
                 formData.confirmPassword ? 'border-red-500' : 'border-gray-300'
               }`}
               required
+              minLength={12}
             />
             <LockIcon className="absolute right-3 top-3 text-gray-400" />
           </div>
@@ -266,26 +367,33 @@ setTimeout(() => {
           type="submit"
           disabled={!isFormValid || isSubmitting || serverStatus !== 'healthy'}
           className={`w-full py-2 px-4 rounded text-white font-medium ${
-            (!isFormValid || serverStatus !== 'healthy') ? 'bg-gray-400' :
-            'bg-blue-600 hover:bg-blue-700'
+            (!isFormValid || serverStatus !== 'healthy') ? 'bg-gray-400 cursor-not-allowed' :
+            'bg-blue-600 hover:bg-blue-700 transition-colors'
           }`}
         >
-          {isSubmitting ? 'Registrando...' : 'Registrarse'}
+          {isSubmitting ? (
+            <span className="flex items-center justify-center">
+              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Registrando...
+            </span>
+          ) : 'Registrarse'}
         </button>
 
         <div className="text-center text-sm pt-2">
-        <p>
-          ¿Ya tienes cuenta?{' '}
-          <button 
-            type="button" 
-            onClick={() => navigate('/user-auth/login')} // Ruta corregida
-            className="text-blue-600 hover:underline"
-          >
-            Inicia sesión
-          </button>
-        </p>
-      </div>
-
+          <p>
+            ¿Ya tienes cuenta?{' '}
+            <button 
+              type="button" 
+              onClick={() => navigate('/user-auth/login')}
+              className="text-blue-600 hover:underline focus:outline-none"
+            >
+              Inicia sesión
+            </button>
+          </p>
+        </div>
       </form>
     </div>
   );
