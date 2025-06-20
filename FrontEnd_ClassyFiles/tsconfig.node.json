@@ -1,11 +1,16 @@
 {
   "compilerOptions": {
-    "composite": true,
+    "jsx": "react-jsx",  // Para React 17+
+    // O si usas una versión anterior de React:
+    // "jsx": "react",
+    
+    // Otras configuraciones importantes:
+    "target": "es6",
+    "module": "esnext",
+    "strict": true,
+    "esModuleInterop": true,
     "skipLibCheck": true,
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "allowSyntheticDefaultImports": true,
-    "strict": true
+    "forceConsistentCasingInFileNames": true
   },
-  "include": ["vite.config.ts"]
+  "include": ["src/**/*"]
 }

@@ -1,53 +1,75 @@
-import React, { useState } from 'react';
-import { MenuIcon, XIcon } from 'lucide-react';
-export function Header() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  return <header className="bg-[#14263C] text-white sticky top-0 z-50">
-      <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-        <div className="flex items-center">
-          <span className="text-2xl font-bold text-[#D18E41]">Cassy</span>
-          <span className="text-2xl font-bold text-white">Files</span>
+import { Link } from 'react-router-dom';
+
+interface HeaderProps {
+  isAuth: boolean;
+  userType: 'user' | 'company' | null;
+  onLogout: () => void;
+}
+
+export function Header({ isAuth, userType, onLogout }: HeaderProps) {
+  return (
+    <header className="bg-white shadow-sm">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-16">
+          {/* Logo o nombre de la app */}
+          <Link to="/" className="text-xl font-bold text-[#14263C]">
+            ClassyFiles
+          </Link>
+
+          {/* Menú de navegación */}
+          <nav className="flex items-center space-x-4">
+            {!isAuth ? (
+              <>
+                {/* Botones para usuarios NO autenticados */}
+                <Link
+                  to="/user-auth/login"
+                  className="px-3 py-2 text-sm font-medium text-[#14263C] hover:text-[#d18e41]"
+                >
+                  Iniciar Sesión (Usuario)
+                </Link>
+                <Link
+                  to="/user-auth/register"
+                  className="px-3 py-2 text-sm font-medium text-[#14263C] hover:text-[#d18e41]"
+                >
+                  Registrarse (Usuario)
+                </Link>
+                <Link
+                  to="/company-auth/login"
+                  className="px-3 py-2 text-sm font-medium text-[#14263C] hover:text-[#d18e41]"
+                >
+                  Empresa
+                </Link>
+              </>
+            ) : (
+              <>
+                {/* Menú para usuarios autenticados */}
+                {userType === 'user' && (
+                  <Link
+                    to="/dashboard"
+                    className="px-3 py-2 text-sm font-medium text-[#14263C] hover:text-[#d18e41]"
+                  >
+                    Mi Panel
+                  </Link>
+                )}
+                {userType === 'company' && (
+                  <Link
+                    to="/dashboard-empresa"
+                    className="px-3 py-2 text-sm font-medium text-[#14263C] hover:text-[#d18e41]"
+                  >
+                    Panel Empresa
+                  </Link>
+                )}
+                <button
+                  onClick={onLogout}
+                  className="px-3 py-2 text-sm font-medium text-red-600 hover:text-red-800"
+                >
+                  Cerrar Sesión
+                </button>
+              </>
+            )}
+          </nav>
         </div>
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex space-x-8">
-          <a href="#problem" className="hover:text-[#D18E41] transition-colors">
-            Problema
-          </a>
-          <a href="#solution" className="hover:text-[#D18E41] transition-colors">
-            Solución
-          </a>
-          <a href="#market" className="hover:text-[#D18E41] transition-colors">
-            Mercado
-          </a>
-          <a href="#pricing" className="hover:text-[#D18E41] transition-colors">
-            Precios
-          </a>
-          <button className="bg-[#D18E41] text-white px-4 py-2 rounded-md hover:bg-opacity-90 transition-colors">
-            Contáctanos
-          </button>
-        </nav>
-        {/* Mobile Menu Button */}
-        <button className="md:hidden text-white" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-          {isMenuOpen ? <XIcon size={24} /> : <MenuIcon size={24} />}
-        </button>
       </div>
-      {/* Mobile Navigation */}
-      {isMenuOpen && <nav className="md:hidden bg-[#14263C] px-4 py-4 flex flex-col space-y-4">
-          <a href="#problem" className="hover:text-[#D18E41] transition-colors" onClick={() => setIsMenuOpen(false)}>
-            Problema
-          </a>
-          <a href="#solution" className="hover:text-[#D18E41] transition-colors" onClick={() => setIsMenuOpen(false)}>
-            Solución
-          </a>
-          <a href="#market" className="hover:text-[#D18E41] transition-colors" onClick={() => setIsMenuOpen(false)}>
-            Mercado
-          </a>
-          <a href="#pricing" className="hover:text-[#D18E41] transition-colors" onClick={() => setIsMenuOpen(false)}>
-            Precios
-          </a>
-          <button className="bg-[#D18E41] text-white px-4 py-2 rounded-md hover:bg-opacity-90 transition-colors w-full">
-            Contáctanos
-          </button>
-        </nav>}
-    </header>;
+    </header>
+  );
 }
