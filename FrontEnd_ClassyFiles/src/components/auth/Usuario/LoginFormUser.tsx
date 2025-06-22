@@ -88,7 +88,7 @@ export function LoginFormUser({ setIsAuth, setUserType }: { setIsAuth: (value: b
       setIsAuth(true);
       setUserType('user');
       navigate('/dashboard'); // Redirige al dashboard después del login
-      
+
     } catch (err) {
       setError(err instanceof Error ? 
         err.message : 
@@ -103,7 +103,7 @@ export function LoginFormUser({ setIsAuth, setUserType }: { setIsAuth: (value: b
   return (
     <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-bold mb-6 text-center">Iniciar Sesión</h2>
-      
+
       {/* Estado del servidor */}
       <div className={`mb-4 p-2 rounded text-sm ${
         serverStatus === 'healthy' ? 'bg-green-100 text-green-800' :

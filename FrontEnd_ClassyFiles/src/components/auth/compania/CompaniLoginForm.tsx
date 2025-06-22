@@ -93,7 +93,7 @@ export function CompanLoginForm({ setIsAuth, setUserType }: {
       setIsAuth(true);
       setUserType('company');
       navigate('/dashboard'); // Redirige al dashboard de empresa
-      
+
     } catch (err) {
       setError(err instanceof Error ? 
         err.message : 
@@ -108,7 +108,7 @@ export function CompanLoginForm({ setIsAuth, setUserType }: {
   return (
     <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-bold mb-6 text-center">Iniciar Sesión Empresarial</h2>
-      
+
       {/* Estado del servidor */}
       <div className={`mb-4 p-2 rounded text-sm ${
         serverStatus === 'healthy' ? 'bg-green-100 text-green-800' :

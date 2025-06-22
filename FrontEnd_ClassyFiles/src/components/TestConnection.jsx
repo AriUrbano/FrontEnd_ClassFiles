@@ -42,7 +42,7 @@ export default function TestConnection() {
           {loading ? 'Probando...' : 'Probar Conexión'}
         </button>
         <button 
-          onClick={() => window.open('http://localhost:3000/api/health')}
+          onClick={() => window.open('http://localhost:3001/api/health')}
           style={styles.secondaryButton}
         >
           Probar Manualmente
